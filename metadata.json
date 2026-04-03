@@ -1,0 +1,5 @@
+{
+  "name": "Real Estate Cost Sheet Generator",
+  "description": "A professional tool for generating real estate price sheets with PDF, Word, and Excel export functionality.",
+  "requestFramePermissions": []
+}

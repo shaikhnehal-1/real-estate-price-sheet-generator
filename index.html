@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Real Estate Cost Sheet Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Libraries for Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Real Estate Cost Sheet</h1>
+            <p>Generate professional price sheets instantly</p>
+        </header>
+
+        <main class="main-content">
+            <section class="input-section">
+                <div class="card">
+                    <h2>Property Details</h2>
+                    <div class="form-group">
+                        <label for="customerName">Customer Name (Optional)</label>
+                        <input type="text" id="customerName" placeholder="Enter customer name">
+                    </div>
+                    <div class="form-group">
+                        <label for="config">Configuration</label>
+                        <select id="config">
+                            <option value="1 BHK">1 BHK</option>
+                            <option value="2 BHK">2 BHK</option>
+                            <option value="3 BHK">3 BHK</option>
+                            <option value="4 BHK">4 BHK</option>
+                            <option value="Penthouse">Penthouse</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="area">Area (sqft)</label>
+                            <input type="number" id="area" placeholder="e.g. 1000" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="basicRate">Basic Rate (Rs/sqft)</label>
+                            <input type="number" id="basicRate" placeholder="e.g. 5000" min="0">
+                        </div>
+                    </div>
+
+                    <h2>Additional Charges</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="devCharges">Dev. Charges (Rs/sqft)</label>
+                            <input type="number" id="devCharges" placeholder="e.g. 200" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="floorRiseRate">Floor Rise (Rs/sqft)</label>
+                            <input type="number" id="floorRiseRate" placeholder="e.g. 50" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="numFloors">No. of Floors</label>
+                            <input type="number" id="numFloors" placeholder="e.g. 5" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="societyCharge">Society Formation (Rs)</label>
+                            <input type="number" id="societyCharge" placeholder="Direct amount" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="amenitiesCharge">Club/Amenities (Rs)</label>
+                            <input type="number" id="amenitiesCharge" placeholder="Direct amount" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="parkingCharge">Paid Parking (Rs)</label>
+                            <input type="number" id="parkingCharge" placeholder="Direct amount" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="legalCharge">Legal Charges (Rs)</label>
+                            <input type="number" id="legalCharge" placeholder="Direct amount" min="0">
+                        </div>
+                    </div>
+
+                    <h2>Statutory Charges</h2>
+                    
+                    <!-- Stamp Duty -->
+                    <div class="tax-group">
+                        <label>Stamp Duty</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="stampDutyType" value="percentage" checked> Percentage</label>
+                            <label><input type="radio" name="stampDutyType" value="amount"> Direct Amount</label>
+                        </div>
+                        <div id="stampDutyPercentFields" class="tax-fields">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Agreement Value (Rs)</label>
+                                    <input type="number" id="stampDutyAgreementValue" placeholder="Agreement Value">
+                                </div>
+                                <div class="form-group">
+                                    <label>Percentage (%)</label>
+                                    <input type="number" id="stampDutyPercent" placeholder="e.g. 5" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="stampDutyAmountFields" class="tax-fields hidden">
+                            <div class="form-group">
+                                <label>Direct Amount (Rs)</label>
+                                <input type="number" id="stampDutyAmount" placeholder="Enter amount">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registration -->
+                    <div class="tax-group">
+                        <label>Registration Charges</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="regType" value="percentage" checked> Percentage</label>
+                            <label><input type="radio" name="regType" value="amount"> Direct Amount</label>
+                        </div>
+                        <div id="regPercentFields" class="tax-fields">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Agreement Value (Rs)</label>
+                                    <input type="number" id="regAgreementValue" placeholder="Agreement Value">
+                                </div>
+                                <div class="form-group">
+                                    <label>Percentage (%)</label>
+                                    <input type="number" id="regPercent" placeholder="e.g. 1" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="regAmountFields" class="tax-fields hidden">
+                            <div class="form-group">
+                                <label>Direct Amount (Rs)</label>
+                                <input type="number" id="regAmount" placeholder="Enter amount">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GST -->
+                    <div class="tax-group">
+                        <label>GST</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="gstType" value="percentage" checked> Percentage</label>
+                            <label><input type="radio" name="gstType" value="amount"> Direct Amount</label>
+                        </div>
+                        <div id="gstPercentFields" class="tax-fields">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Agreement Value (Rs)</label>
+                                    <input type="number" id="gstAgreementValue" placeholder="Agreement Value">
+                                </div>
+                                <div class="form-group">
+                                    <label>Percentage (%)</label>
+                                    <input type="number" id="gstPercent" placeholder="e.g. 12" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="gstAmountFields" class="tax-fields hidden">
+                            <div class="form-group">
+                                <label>Direct Amount (Rs)</label>
+                                <input type="number" id="gstAmount" placeholder="Enter amount">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="generateBtn" class="primary-btn">Generate Cost Sheet</button>
+                </div>
+            </section>
+
+            <section class="output-section">
+                <div id="costSheetPreview" class="card preview-card hidden">
+                    <div id="sheetContent">
+                        <div class="sheet-header">
+                            <h2>COST SHEET</h2>
+                            <p id="previewCustomerName"></p>
+                            <p id="previewConfig"></p>
+                            <p id="previewArea"></p>
+                            <p id="previewDate"></p>
+                        </div>
+                        <table class="cost-table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th class="text-right">Amount (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="costTableBody">
+                                <!-- Rows will be added here -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td>Grand Total</td>
+                                    <td id="grandTotal" class="text-right"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="export-actions">
+                        <button onclick="exportPDF()" class="export-btn pdf">PDF</button>
+                        <button onclick="exportExcel()" class="export-btn excel">Excel</button>
+                        <button onclick="exportWord()" class="export-btn word">Word</button>
+                        <button onclick="window.print()" class="export-btn print">Print</button>
+                    </div>
+                </div>
+                <div id="emptyState" class="empty-state">
+                    <p>Enter property details and click "Generate Cost Sheet" to view the breakdown.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
